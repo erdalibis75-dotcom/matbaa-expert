@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Matbaa Expert</title>
+    <meta name="description" content="Matbaa fiyatlandırma ve montaj hesaplama sistemi">
+    <meta name="theme-color" content="#e8360a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MatbaaEx">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0f0f14;
+            --ink2: #1e1e2e;
+            --ink3: #2d2d42;
+            --paper: #f5f3ee;
+            --paper2: #ede9e0;
+            --accent: #e8360a;
+            --accent2: #ff6b42;
+            --gold: #d4a017;
+            --green: #1a9e5c;
+            --green2: #22c55e;
+            --blue: #1a56db;
+            --border: rgba(15,15,20,0.12);
+            --shadow: 0 4px 24px rgba(15,15,20,0.10);
+            --radius: 14px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--ink); color: var(--ink); padding-bottom: 90px; min-height: 100vh; }
+
+        /* DARK SELECT */
+        .dark-select { width:100%; background:var(--ink3); border:2px solid rgba(255,255,255,.1); border-radius:12px; padding:13px 36px 13px 14px; color:var(--accent2); font-size:15px; font-weight:800; font-family:'DM Sans',sans-serif; outline:none; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ff6b42' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; cursor:pointer; }
+        .dark-select:focus { border-color:var(--accent); }
+
+        /* DARK FIELD */
+        .dark-field { margin-bottom:10px; }
+        .dark-field-label { font-size:10px; font-weight:900; color:rgba(255,255,255,.6); letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; display:block; }
+        .dark-field-label2 { font-size:13px; font-weight:900; color:white; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; display:block; }
+
+        /* SELECT — yeşil seçili, kırmızı Yok */
+        .dark-select { color: #22c55e !important; }
+        .dark-select.is-yok { color: #ff6b6b !important; border-color: rgba(255,107,107,.35) !important; background-color: rgba(255,107,107,.06) !important; }
+        .dark-select.is-ok  { color: #22c55e !important; border-color: rgba(34,197,94,.35) !important; background-color: rgba(34,197,94,.06) !important; }
+
+        /* VIEWS */
+        .view { display: none; }
+        .view.active { display: block; animation: fadeUp 0.22s ease; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+        /* HOME — full page, no scroll */
+        #view-home {
+            position: fixed; inset: 0;
+            background: var(--ink);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            overflow: hidden;
+        }
+        #view-home.active { display: flex; }
+        #view-home::before {
+            content:''; position:absolute; top:-100px; right:-60px;
+            width:280px; height:280px;
+            background:radial-gradient(circle,var(--accent) 0%,transparent 70%); opacity:.18;
+        }
+        #view-home::after {
+            content:''; position:absolute; bottom:-60px; left:-40px;
+            width:220px; height:220px;
+            background:radial-gradient(circle,var(--gold) 0%,transparent 70%); opacity:.12;
+        }
+        .home-logo { font-family:'Bebas Neue',cursive; font-size:60px; letter-spacing:4px; color:white; line-height:1; text-align:center; position:relative; z-index:1; }
+        .home-logo span { color:var(--accent2); }
+        .home-sub { color:rgba(255,255,255,.4); font-size:11px; letter-spacing:3px; text-transform:uppercase; margin:8px 0 48px; position:relative; z-index:1; }
+        .home-btns { width:100%; max-width:310px; position:relative; z-index:1; display:flex; flex-direction:column; gap:10px; }
+        .home-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+        /* FIRM-ASK — full page, no scroll */
+        #view-firm-ask {
+            position: fixed; inset: 0;
+            background: var(--ink);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        #view-firm-ask.active { display: flex; }
+        .firm-ask-box { background:var(--ink2); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:28px 22px; width:100%; max-width:360px; }
+        .firm-ask-box h2 { font-family:'Bebas Neue',cursive; font-size:28px; color:white; letter-spacing:2px; margin-bottom:4px; }
+        .firm-ask-box p { color:rgba(255,255,255,.4); font-size:12px; margin-bottom:20px; }
+        .field-label { font-size:10px; font-weight:900; color:var(--accent2); letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; display:block; }
+
+        /* BUTTONS */
+        .btn-primary { background:var(--accent); color:white; border:none; padding:16px 20px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-weight:900; font-size:14px; letter-spacing:1px; cursor:pointer; width:100%; text-transform:uppercase; transition:transform .1s; box-shadow:0 4px 16px rgba(232,54,10,.35); }
+        .btn-primary:active { transform:scale(.97); }
+        .btn-secondary { background:rgba(255,255,255,.08); color:rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.15); padding:14px 20px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-weight:700; font-size:13px; letter-spacing:1px; cursor:pointer; width:100%; text-transform:uppercase; transition:background .15s; }
+        .btn-secondary:active { background:rgba(255,255,255,.14); }
+        .btn-dark { background:var(--ink3); color:white; border:none; padding:14px 20px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-weight:800; font-size:13px; letter-spacing:1px; cursor:pointer; width:100%; text-transform:uppercase; transition:opacity .15s; }
+        .btn-dark:active { opacity:.7; }
+        .btn-green { background:var(--green); color:white; border:none; padding:16px 20px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-weight:900; font-size:15px; letter-spacing:1px; cursor:pointer; width:100%; text-transform:uppercase; transition:transform .1s; box-shadow:0 4px 16px rgba(26,158,92,.30); }
+        .btn-green:active { transform:scale(.97); }
+        .btn-cancel { background:#fff0ee; color:var(--accent); border:1px solid #ffd5cc; padding:14px 20px; border-radius:var(--radius); font-family:'DM Sans',sans-serif; font-weight:800; font-size:13px; letter-spacing:1px; cursor:pointer; width:100%; text-transform:uppercase; }
+        .btn-sm-edit { background:var(--gold); color:var(--ink); border:none; padding:5px 10px; border-radius:7px; font-size:11px; font-weight:800; cursor:pointer; }
+        .btn-sm-del { background:var(--accent); color:white; border:none; padding:5px 10px; border-radius:7px; font-size:11px; font-weight:800; cursor:pointer; margin-left:5px; }
+
+        /* CARD */
+        .card { background:white; border-radius:var(--radius); padding:16px; margin:8px 12px; border:1px solid var(--border); box-shadow:var(--shadow); }
+
+        /* INPUTS */
+        label { display:block; font-size:10px; font-weight:900; color:var(--accent); margin-bottom:5px; text-transform:uppercase; letter-spacing:1px; }
+        .input-field { width:100%; border-radius:10px; padding:10px 12px; border:2px solid var(--paper2); margin-bottom:9px; font-weight:700; outline:none; font-size:14px; font-family:'DM Sans',sans-serif; color:var(--ink); background:var(--paper); transition:border-color .15s; -webkit-appearance:none; }
+        .input-field:focus { border-color:var(--accent); background:white; }
+        .input-dark { width:100%; border-radius:10px; padding:11px 13px; border:2px solid rgba(255,255,255,.08); margin-bottom:12px; font-weight:700; outline:none; font-size:15px; font-family:'DM Sans',sans-serif; color:white; background:var(--ink3); transition:border-color .15s; }
+        .input-dark:focus { border-color:var(--accent2); }
+        select.input-field { cursor:pointer; }
+        select { appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px !important; }
+
+        /* GRID */
+        .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .grid-full { grid-column:1/-1; }
+
+        /* SECTION HEAD */
+        .section-head { font-family:'Bebas Neue',cursive; font-size:20px; letter-spacing:2px; color:var(--ink); margin-bottom:12px; padding-bottom:9px; border-bottom:2px solid var(--paper2); }
+
+        /* PRICE TAG — birim maliyet gösterir */
+        .price-tag { float:right; font-weight:900; font-size:11px; background:rgba(212,160,23,.15); color:var(--gold); padding:3px 8px; border-radius:20px; letter-spacing:0; border:1px solid rgba(212,160,23,.3); }
+        .price-tag.empty { background:rgba(232,54,10,.15); color:var(--accent); border-color:rgba(232,54,10,.3); }
+
+        /* FIRM HEADER */
+        .firm-header { background:var(--ink); border-radius:var(--radius); padding:12px 16px; margin:8px 12px; display:flex; align-items:center; justify-content:space-between; }
+        .firm-header .firm-name { font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:2px; color:white; }
+        .firm-header .firm-label { font-size:9px; color:var(--accent2); letter-spacing:2px; text-transform:uppercase; }
+        .firm-header .firm-is { font-size:11px; color:rgba(255,255,255,.5); margin-top:2px; }
+
+        /* RESULT BOX */
+        #sonuc-view { background:var(--ink); border-radius:var(--radius); padding:20px 16px; margin:8px 12px; display:none; }
+        #sonuc-view.show { display:block; animation:fadeUp .3s ease; }
+        .result-total { text-align:center; font-family:'Bebas Neue',cursive; font-size:44px; letter-spacing:2px; line-height:1; }
+        .result-label { text-align:center; font-size:9px; color:rgba(255,255,255,.35); letter-spacing:3px; text-transform:uppercase; margin-top:3px; margin-bottom:0; }
+        .breakdown-item { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+        .breakdown-item:last-child { border-bottom:none; }
+        .breakdown-item .bname { font-weight:700; color:rgba(255,255,255,.5); font-size:10px; text-transform:uppercase; letter-spacing:1px; }
+        .breakdown-item .bval { font-weight:900; color:var(--green2); font-size:13px; }
+
+        /* SATIŞ FİYATI KUTUSU */
+        .satis-box { background:rgba(255,255,255,.05); border-radius:10px; padding:12px; margin-top:12px; display:flex; align-items:center; gap:10px; }
+        .satis-box label { color:var(--gold); font-size:9px; margin-bottom:0; white-space:nowrap; }
+        .satis-input { background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.12); border-radius:8px; padding:8px 10px; color:white; font-size:15px; font-weight:900; font-family:'DM Sans',sans-serif; outline:none; width:70px; text-align:center; }
+        .satis-input:focus { border-color:var(--gold); }
+        .satis-result { flex:1; text-align:right; }
+        .satis-result .sval { font-family:'Bebas Neue',cursive; font-size:26px; color:var(--gold); letter-spacing:1px; }
+        .satis-result .slbl { font-size:9px; color:rgba(255,255,255,.4); letter-spacing:2px; text-transform:uppercase; }
+
+        /* HISTORY */
+        .hist-card { background:white; border-radius:10px; padding:10px 12px; margin-bottom:7px; border:1px solid var(--border); border-left:3px solid var(--accent); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        .hist-info { flex:1; min-width:0; }
+        .hist-firma { font-family:'Bebas Neue',cursive; font-size:15px; letter-spacing:1px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .hist-is { font-size:10px; color:var(--accent); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .hist-tarih { font-size:10px; color:#bbb; }
+        .hist-birim { font-family:'Bebas Neue',cursive; font-size:18px; color:var(--green); letter-spacing:1px; white-space:nowrap; }
+        .hist-toplam { font-size:10px; color:#bbb; white-space:nowrap; }
+        .hist-actions { display:flex; flex-direction:column; gap:5px; flex-shrink:0; }
+        .hist-actions .btn-upd { background:var(--blue); color:white; border:none; padding:6px 10px; border-radius:7px; font-weight:800; font-size:10px; cursor:pointer; white-space:nowrap; }
+        .hist-actions .btn-del { background:#fff0ee; color:var(--accent); border:1px solid #ffd5cc; padding:6px 10px; border-radius:7px; font-weight:800; font-size:10px; cursor:pointer; }
+
+        /* SETTINGS HEADER */
+        .settings-header { background:var(--ink); padding:36px 18px 18px; }
+        .settings-header h2 { font-family:'Bebas Neue',cursive; font-size:28px; letter-spacing:3px; color:white; }
+        .settings-header .back-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+        .btn-back { background:rgba(255,255,255,.1); color:white; border:none; padding:6px 14px; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer; letter-spacing:1px; }
+
+        /* NAV BAR */
+        .nav-bar { position:fixed; bottom:0; left:0; right:0; background:var(--ink); display:flex; padding:10px 0 16px; border-top:1px solid rgba(255,255,255,.07); z-index:2000; }
+        .nav-bar.hidden { display:none; }
+        .nav-item { flex:1; text-align:center; cursor:pointer; padding:6px 0; color:rgba(255,255,255,.3); font-size:9px; font-weight:800; letter-spacing:1px; text-transform:uppercase; transition:color .15s; }
+        .nav-item .nav-icon { font-size:19px; display:block; margin-bottom:3px; }
+        .nav-item.active { color:var(--accent2); }
+
+        /* CAT BUTTONS */
+        .cat-row { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; }
+        .cat-btn { flex:1; min-width:64px; padding:9px 6px; border-radius:10px; border:2px solid var(--paper2); background:white; font-weight:900; font-size:10px; color:#888; cursor:pointer; letter-spacing:.5px; white-space:nowrap; transition:all .15s; }
+        .cat-btn.active { background:var(--ink); color:white; border-color:var(--ink); }
+
+        /* LIST ITEMS */
+        .list-item { background:var(--paper); border:1px solid var(--border); padding:11px; border-radius:10px; margin-bottom:7px; font-size:13px; display:flex; align-items:center; justify-content:space-between; }
+        .list-item .li-name { font-weight:700; }
+        .list-item .li-price { font-size:11px; color:#888; margin-top:2px; }
+
+        /* KUR BOX */
+        .kur-box { background:var(--ink2); border-radius:var(--radius); padding:14px 16px; margin:8px 12px; display:flex; align-items:center; gap:12px; }
+        .kur-label { font-size:11px; font-weight:900; color:var(--gold); letter-spacing:1px; text-transform:uppercase; white-space:nowrap; }
+        .kur-box input { flex:1; background:rgba(255,255,255,.07); border:2px solid rgba(255,255,255,.12); border-radius:10px; padding:9px 12px; color:white; font-size:16px; font-weight:900; font-family:'DM Sans',sans-serif; outline:none; }
+        .kur-box input:focus { border-color:var(--gold); }
+
+        /* EMPTY STATE */
+        .empty-state { text-align:center; padding:36px 20px; color:#bbb; font-size:13px; }
+        .empty-state .big { font-size:36px; margin-bottom:8px; }
+
+        /* SEARCH */
+        .search-box { position:relative; margin-bottom:10px; }
+        .search-box span { position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:15px; pointer-events:none; }
+        .search-box input { width:100%; border-radius:12px; padding:11px 11px 11px 38px; border:2px solid var(--border); font-size:14px; font-family:'DM Sans',sans-serif; font-weight:600; outline:none; background:white; color:var(--ink); }
+        .search-box input:focus { border-color:var(--accent); }
+        /* STİCKY ÖZET ŞERIT */
+        .sticky-bar { position:fixed; top:0; left:0; right:0; z-index:1500; background:linear-gradient(135deg,#1a0a05,#2d1205); border-bottom:2px solid var(--accent); padding:8px 12px; display:none; flex-wrap:wrap; gap:6px; align-items:center; }
+        .sticky-bar.visible { display:flex; }
+        .sticky-chip { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:4px 10px; font-size:11px; font-weight:800; color:white; white-space:nowrap; font-family:'DM Sans',sans-serif; }
+        .sticky-chip.accent { background:rgba(232,54,10,.2); border-color:rgba(232,54,10,.4); color:var(--accent2); }
+        .sticky-chip.gold   { background:rgba(212,160,23,.2); border-color:rgba(212,160,23,.4); color:var(--gold); }
+        .sticky-chip.green  { background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.3); color:var(--green2); }
+
+        /* GLOBAL HOME BTN */
+        .home-fab { position:fixed; top:14px; right:14px; z-index:3000; background:var(--accent); color:white; border:none; border-radius:10px; padding:8px 14px; font-size:11px; font-weight:900; letter-spacing:1px; cursor:pointer; box-shadow:0 3px 12px rgba(232,54,10,.4); display:none; }
+        .home-fab.visible { display:block; }
+        /* MONTAJ SAYFASI */
+        .montaj-header { background:linear-gradient(135deg,#0d1220,#151c30); padding:36px 18px 18px; border-bottom:1px solid rgba(79,140,255,.15); }
+        .montaj-header h2 { font-family:'Bebas Neue',cursive; font-size:28px; letter-spacing:3px; background:linear-gradient(135deg,#e8ecf4 30%,#4f8cff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .montaj-header p { font-size:11px; color:#5a6380; margin-top:4px; font-family:monospace; }
+        .montaj-card { background:#151820; border:1px solid #252a3a; border-radius:16px; padding:16px; margin:8px 12px; }
+        .montaj-card-title { font-size:9px; font-weight:800; letter-spacing:2px; color:#4f8cff; font-family:monospace; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+        .montaj-card-title::after { content:''; flex:1; height:1px; background:#252a3a; }
+        .montaj-input { background:#1c2030; border:1px solid #252a3a; border-radius:10px; padding:10px 12px; color:#e8ecf4; font-family:monospace; font-size:14px; font-weight:700; outline:none; width:100%; transition:border-color .2s; -moz-appearance:textfield; }
+        .montaj-input::-webkit-outer-spin-button, .montaj-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+        .montaj-input:focus { border-color:#4f8cff; }
+        .montaj-label { font-size:8px; font-weight:700; letter-spacing:1.5px; color:#7b8caa; font-family:monospace; text-transform:uppercase; margin-bottom:5px; display:block; }
+        .montaj-field { display:flex; flex-direction:column; gap:5px; }
+        .montaj-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .montaj-grid4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; }
+        .sahne-wrapper-m { background:#151820; border:1px solid #252a3a; border-radius:16px; padding:16px; margin:8px 12px; }
+        .sahne-outer-m { display:flex; align-items:center; justify-content:center; background:#0a0c10; border-radius:12px; border:1px solid #1e2235; padding:16px; min-height:180px; position:relative; overflow:hidden; }
+        .sahne-outer-m::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(79,140,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(79,140,255,.04) 1px,transparent 1px); background-size:20px 20px; }
+        #m-tabaka { position:relative; background:white; border-radius:4px; display:grid; gap:1px; box-shadow:0 0 30px rgba(79,140,255,.15); transition:all .3s; }
+        .m-pay-overlay { position:absolute; pointer-events:none; z-index:5; transition:all .3s; }
+        .m-pay-top    { top:0;left:0;right:0;background:rgba(255,107,107,.25);border-bottom:1px dashed rgba(255,107,107,.6); }
+        .m-pay-bottom { bottom:0;left:0;right:0;background:rgba(255,107,107,.25);border-top:1px dashed rgba(255,107,107,.6); }
+        .m-pay-left   { top:0;left:0;bottom:0;background:rgba(255,180,0,.2);border-right:1px dashed rgba(255,180,0,.6); }
+        .m-pay-right  { top:0;right:0;bottom:0;background:rgba(255,180,0,.2);border-left:1px dashed rgba(255,180,0,.6); }
+        .m-is-kutusu  { background:transparent; display:flex; align-items:center; justify-content:center; overflow:hidden; border:.5px solid rgba(0,0,0,.35); }
+        .m-result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+        .m-result-badge { background:#1c2030; border:1px solid #252a3a; border-radius:12px; padding:10px 8px; text-align:center; }
+        .m-result-badge .val { font-size:18px; font-weight:900; font-family:monospace; color:#00e5b0; line-height:1; }
+        .m-result-badge .lbl { font-size:8px; color:#5a6380; font-family:monospace; letter-spacing:1px; margin-top:4px; }
+        .m-result-badge.hl .val { color:#4f8cff; }
+        .m-result-badge.warn .val { color:#ff6b6b; font-size:13px; }
+        .m-info { background:#1c2030; border:1px solid #252a3a; border-radius:10px; padding:10px 14px; font-family:monospace; font-size:10px; color:#5a6380; margin-top:10px; line-height:1.8; }
+        .m-info span { color:#e8ecf4; font-weight:700; }
+        .m-legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
+        .m-leg-item { display:flex; align-items:center; gap:5px; font-size:9px; font-family:monospace; color:#5a6380; }
+        .m-leg-dot { width:10px; height:10px; border-radius:2px; }
+        /* BU EBADI KULLAN butonu */
+        .btn-use-ebat { display:none; width:calc(100% - 24px); margin:0 12px 12px; background:linear-gradient(135deg,#4f8cff,#2562d4); color:white; border:none; border-radius:var(--radius); padding:16px; font-family:'DM Sans',sans-serif; font-weight:900; font-size:14px; letter-spacing:1px; cursor:pointer; text-transform:uppercase; transition:transform .1s; box-shadow:0 4px 16px rgba(79,140,255,.35); }
+        .btn-use-ebat.visible { display:block; animation:fadeUp .3s ease; }
+        .btn-use-ebat:active { transform:scale(.97); }
+    </style>
+</head>
+<body>
+<button class="home-fab" id="homeFab" onclick="showView('home')">🏠 ANA SAYFA</button>
+
+<!-- STİCKY ÖZET ŞERIT -->
+<div class="sticky-bar" id="stickyBar">
+    <span class="sticky-chip accent" id="sc-siparis">—</span>
+    <span class="sticky-chip" id="sc-olcu">—</span>
+    <span class="sticky-chip" id="sc-montaj">—</span>
+    <span class="sticky-chip green" id="sc-islemler">—</span>
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="view-home" class="view active">
+    <div class="home-logo">MATBAA<br><span>EXPERT</span></div>
+    <div class="home-sub">v5.0 · Fiyatlandırma Sistemi</div>
+    <div class="home-btns">
+        <button class="btn-primary" onclick="openNewPrice()">+ YENİ FİYAT TEKLİFİ</button>
+        <button class="btn-secondary" style="background:rgba(79,140,255,.15); border-color:rgba(79,140,255,.4); color:#7eb3ff;" onclick="showView('montaj')">📐 MONTAJ HESAPLA</button>
+        <button class="btn-secondary" onclick="showView('history')">📂 MÜŞTERİ GEÇMİŞİ</button>
+    </div>
+</div>
+
+<!-- ══ FIRM ASK ══ -->
+<div id="view-firm-ask" class="view">
+    <div class="firm-ask-box">
+        <h2>YENİ TEKLİF</h2>
+        <p>Firma ve iş bilgilerini girin</p>
+        <span class="field-label">Firma Adı</span>
+        <input type="text" id="firmName" placeholder="Örn: ABC Ambalaj" class="input-dark" autocomplete="off">
+        <span class="field-label">İş Adı</span>
+        <input type="text" id="isAdi" placeholder="Örn: Karton Kutu 500 Adet" class="input-dark" autocomplete="off">
+        <button class="btn-primary" onclick="startApp()" style="margin-bottom:9px;">BAŞLA →</button>
+        <button class="btn-secondary" onclick="showView('home')">GERİ</button>
+    </div>
+</div>
+
+<!-- ══ PANEL ══ -->
+<div id="view-panel" class="view" style="padding-top:52px;">
+
+    <!-- MÜŞTERİ BAŞLIK -->
+    <div style="background:linear-gradient(135deg,#1a0a05,#2d1205); padding:20px 16px 16px; border-bottom:2px solid var(--accent);">
+        <div style="font-size:9px;font-weight:900;color:var(--accent2);letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;">MÜŞTERİ</div>
+        <div style="font-family:'Bebas Neue',cursive;font-size:26px;letter-spacing:2px;color:white;" id="currentFirmDisplay">—</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px;" id="currentIsDisplay"></div>
+    </div>
+
+    <!-- ÖLÇÜ & ADET -->
+    <div style="background:var(--ink2);margin:10px 10px 0;border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,.07);">
+        <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:3px;color:var(--accent2);margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:8px;">ÖLÇÜ & ADET</div>
+
+        <!-- Sipariş + Kod yan yana EN ÜSTTE -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+                <div style="font-size:9px;font-weight:900;color:var(--accent2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">SİPARİŞ ADEDİ</div>
+                <input type="number" id="siparis" value="1000" oninput="runLogic()" style="width:100%;background:var(--ink3);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;color:white;font-size:20px;font-weight:900;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+            </div>
+            <div>
+                <div style="font-size:9px;font-weight:900;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">🔐 KOD GİRİN</div>
+                <input type="password" id="karMarji" placeholder="••••" style="width:100%;background:var(--ink3);border:2px solid var(--gold);border-radius:12px;padding:14px;color:var(--gold);font-size:20px;font-weight:900;font-family:'DM Sans',sans-serif;outline:none;letter-spacing:6px;text-align:center;" onfocus="this.style.borderColor='#f0b429'" onblur="this.style.borderColor='var(--gold)'">
+            </div>
+        </div>
+
+        <!-- Boy + En -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+                <div style="font-size:9px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">BOY (cm)</div>
+                <input type="number" id="manBoy" value="100" oninput="runLogic()" style="width:100%;background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;color:white;font-size:20px;font-weight:900;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.08)'">
+            </div>
+            <div>
+                <div style="font-size:9px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">EN (cm)</div>
+                <input type="number" id="manEn" value="70" oninput="runLogic()" style="width:100%;background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;color:white;font-size:20px;font-weight:900;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.08)'">
+            </div>
+        </div>
+
+        <!-- Baskı + Kesim kaçlı -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+                <div style="font-size:9px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">BASKI KAÇLI?</div>
+                <input type="number" id="montajAdet" value="4" oninput="runLogic()" style="width:100%;background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;color:white;font-size:20px;font-weight:900;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.08)'">
+            </div>
+            <div>
+                <div style="font-size:9px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">KESİM KAÇLI?</div>
+                <input type="number" id="kesimMontajAdet" value="4" oninput="runLogic()" style="width:100%;background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;color:white;font-size:20px;font-weight:900;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.08)'">
+            </div>
+        </div>
+
+        <!-- Bıçak No -->
+        <div>
+            <div style="font-size:9px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">BIÇAK NO</div>
+            <input type="text" id="bicakNo" placeholder="—" style="width:100%;background:var(--ink3);border:2px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;color:white;font-size:18px;font-weight:700;font-family:'DM Sans',sans-serif;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='rgba(255,255,255,.08)'">
+        </div>
+    </div>
+
+    <!-- MALZEME & İŞLEMLER -->
+    <div style="background:var(--ink2);margin:10px 10px 0;border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,.07);">
+        <div style="font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:3px;color:var(--accent2);margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:8px;">MALZEME & İŞLEMLER</div>
+
+        <!-- Karton + Gramaj -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+                <div style="font-size:13px;font-weight:900;color:white;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">KARTON <span id="p-karton" class="price-tag"></span></div>
+                <select id="selKarton" onchange="fillGramaj();runLogic();colorAllSelects();" class="dark-select"></select>
+            </div>
+            <div>
+                <div style="font-size:13px;font-weight:900;color:white;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">GRAMAJ</div>
+                <select id="selGramaj" onchange="runLogic();colorAllSelects()" class="dark-select"></select>
+            </div>
+        </div>
+
+        <!-- Diğer seçimler -->
+        <div id="malzeme-list">
+            <div class="dark-field"><div class="dark-field-label2">ONDULA <span id="p-ondula" class="price-tag"></span></div><select id="selOndula" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+            <div class="dark-field"><div class="dark-field-label2">SELEFON <span id="p-selefon" class="price-tag"></span></div><select id="selSelefon" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+            <div class="dark-field"><div class="dark-field-label2">BASKI <span id="p-baski" class="price-tag"></span></div><select id="selBaski" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+            <div class="dark-field"><div class="dark-field-label2">SIVAMA <span id="p-sivama" class="price-tag"></span></div><select id="selSivama" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <div><div class="dark-field-label2">VARAK İŞLEM <span id="p-varak" class="price-tag"></span></div><select id="selVarak" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+                <div><div class="dark-field-label2">VARAK FOLYO <span id="p-vhm" class="price-tag"></span></div><select id="selVhm" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+            </div>
+            <div class="dark-field"><div class="dark-field-label2">GOFRAJ <span id="p-gofraj" class="price-tag"></span></div><select id="selGofraj" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+            <div class="dark-field"><div class="dark-field-label2">KESİM <span id="p-kesim" class="price-tag"></span></div><select id="selKesim" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+            <div class="dark-field"><div class="dark-field-label2">YAPISTIRMA <span id="p-yap" class="price-tag"></span></div><select id="selYap" onchange="runLogic();colorAllSelects()" class="dark-select"></select></div>
+        </div>
+
+        <button class="btn-green" onclick="fiyatCikart()" style="font-size:16px;padding:18px;letter-spacing:2px;">HESAPLA ₺</button>
+
+        <!-- Birim maliyet — Hesapla'nın hemen altında -->
+        <div id="birim-maliyet-box" style="display:none;margin-top:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;display:none;justify-content:space-between;align-items:center;">
+            <span style="font-size:9px;font-weight:900;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;">÷ <span id="bm-montaj">—</span> montaj</span>
+            <span id="bm-deger" style="font-family:'Bebas Neue',cursive;font-size:28px;color:white;letter-spacing:1px;">—</span>
+        </div>
+    </div>
+
+    <div id="sonuc-view" style="margin:10px;">
+        <!-- Maliyet dökümü -->
+        <div id="maliyet-breakdown" style="margin-bottom:14px;"></div>
+
+        <!-- Satış fiyatları -->
+        <div style="background:var(--ink2);border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,.07);">
+            <div style="font-size:9px;font-weight:900;color:var(--accent2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">SATIŞ FİYATI</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+                <div style="text-align:center;">
+                    <div class="result-total" id="unit-price" style="color:var(--gold);font-size:32px;">0 ₺</div>
+                    <div class="result-label" style="color:rgba(212,160,23,.6);">Birim Satış</div>
+                    <div id="unit-kdv" style="text-align:center;font-size:10px;color:rgba(212,160,23,.4);margin-top:3px;"></div>
+                </div>
+                <div style="text-align:center;border-left:1px solid rgba(255,255,255,.08);padding-left:10px;">
+                    <div class="result-total" id="total-price" style="color:var(--green2);font-size:32px;">0 ₺</div>
+                    <div class="result-label">Toplam Satış</div>
+                    <div id="total-kdv" style="text-align:center;font-size:10px;color:rgba(255,255,255,.3);margin-top:3px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kaydet / İptal -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+            <button class="btn-cancel" onclick="iptalEt()">✕ İPTAL</button>
+            <button class="btn-green" onclick="saveToHistory()">💾 KAYDET</button>
+        </div>
+    </div>
+    <div style="height:20px;"></div>
+</div>
+
+<!-- ══ MONTAJ ══ -->
+<div id="view-montaj" class="view">
+    <div class="montaj-header">
+        <h2>📐 AKILLI MONTAJ</h2>
+        <p>Makine limiti içinde en verimli tabaka ebatı</p>
+    </div>
+
+    <div class="montaj-card">
+        <div class="montaj-card-title">Makine Limiti (maks. cm)</div>
+        <div class="montaj-grid2">
+            <div class="montaj-field"><span class="montaj-label">Maks. En (cm) — Makas/Etek</span><input type="number" id="m-maxEn" value="105" oninput="mHesapla()" class="montaj-input"></div>
+            <div class="montaj-field"><span class="montaj-label">Maks. Boy (cm) — Motor/Kmd</span><input type="number" id="m-maxBoy" value="74" oninput="mHesapla()" class="montaj-input"></div>
+        </div>
+    </div>
+
+    <div class="montaj-card">
+        <div class="montaj-card-title">İş Ebatları</div>
+        <div class="montaj-grid2">
+            <div class="montaj-field"><span class="montaj-label">İş En (cm)</span><input type="number" id="m-isEn" value="20" oninput="mHesapla()" class="montaj-input"></div>
+            <div class="montaj-field"><span class="montaj-label">İş Boy (cm)</span><input type="number" id="m-isBoy" value="30" oninput="mHesapla()" class="montaj-input"></div>
+        </div>
+    </div>
+
+    <div class="montaj-card">
+        <div class="montaj-card-title">Paylar (cm)</div>
+        <div class="montaj-grid4">
+            <div class="montaj-field"><span class="montaj-label">Makas</span><input type="number" id="m-pM" value="1.5" step="0.5" oninput="mHesapla()" class="montaj-input"></div>
+            <div class="montaj-field"><span class="montaj-label">Etek</span><input type="number" id="m-pE" value="1" step="0.5" oninput="mHesapla()" class="montaj-input"></div>
+            <div class="montaj-field"><span class="montaj-label">Motor</span><input type="number" id="m-pMo" value="1" step="0.5" oninput="mHesapla()" class="montaj-input"></div>
+            <div class="montaj-field"><span class="montaj-label">Kmd</span><input type="number" id="m-pKu" value="1" step="0.5" oninput="mHesapla()" class="montaj-input"></div>
+        </div>
+        <div style="margin-top:12px;" class="montaj-grid2">
+            <div class="montaj-field"><span class="montaj-label">Bıçak Arası (cm)</span><input type="number" id="m-ara" value="0.5" step="0.1" oninput="mHesapla()" class="montaj-input"></div>
+            <div class="montaj-field"><span class="montaj-label">Sipariş Adedi</span><input type="number" id="m-siparis" value="1000" oninput="mHesapla()" class="montaj-input"></div>
+        </div>
+    </div>
+
+    <!-- Görsel -->
+    <div class="sahne-wrapper-m">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:9px;font-weight:700;letter-spacing:2px;color:#4f8cff;font-family:monospace;">TABAKA ÖNİZLEME</span>
+            <span style="font-size:9px;font-family:monospace;color:#5a6380;" id="m-dims">— × —</span>
+        </div>
+        <div class="sahne-outer-m">
+            <div id="m-tabaka">
+                <div class="m-pay-overlay m-pay-top"    id="m-ov-top"></div>
+                <div class="m-pay-overlay m-pay-bottom" id="m-ov-bot"></div>
+                <div class="m-pay-overlay m-pay-left"   id="m-ov-left"></div>
+                <div class="m-pay-overlay m-pay-right"  id="m-ov-right"></div>
+            </div>
+        </div>
+        <div class="m-legend">
+            <div class="m-leg-item"><div class="m-leg-dot" style="background:rgba(255,107,107,.5)"></div>Makas/Etek payı</div>
+            <div class="m-leg-item"><div class="m-leg-dot" style="background:rgba(255,180,0,.45)"></div>Motor/Kmd payı</div>
+            <div class="m-leg-item"><div class="m-leg-dot" style="background:#4f8cff"></div>İş kutucukları</div>
+        </div>
+        <div class="m-result-grid">
+            <div class="m-result-badge hl"><div class="val" id="m-r-adet">—</div><div class="lbl">ADET/TABAKA</div></div>
+            <div class="m-result-badge"><div class="val" id="m-r-tabaka">—</div><div class="lbl">TABAKA SAYISI</div></div>
+            <div class="m-result-badge warn"><div class="val" id="m-r-tabsize">—</div><div class="lbl">TABAKA EBATI</div></div>
+        </div>
+        <div class="m-info" id="m-info-text">Hesaplanıyor...</div>
+    </div>
+
+    <!-- BU EBADI KULLAN butonu -->
+    <button class="btn-use-ebat" id="btnUseEbat" onclick="ebatiKullan()">
+        ✅ BU EBADI FİYATLANDIRMADA KULLAN →
+    </button>
+</div>
+
+<!-- ══ HISTORY ══ -->
+<div id="view-history" class="view">
+    <div class="settings-header">
+        <h2>MÜŞTERİ GEÇMİŞİ</h2>
+    </div>
+    <div style="padding:8px 12px;">
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="historySearch" placeholder="Firma veya iş adı ara..." oninput="renderHistory()">
+        </div>
+        <div id="history-list"></div>
+        <!-- Yedekleme -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+            <button class="btn-green" style="font-size:12px; padding:12px;" onclick="yedekIndir()">📥 YEDEKLEMEYİ İNDİR</button>
+            <label class="btn-dark" style="font-size:12px; padding:12px; text-align:center; cursor:pointer; display:block; border-radius:var(--radius);">
+                📤 YEDEKİ YÜKLE
+                <input type="file" accept=".json" onchange="yedekYukle(event)" style="display:none;">
+            </label>
+        </div>
+        <button class="btn-dark" onclick="showView('home')" style="margin-top:8px;">← ANA SAYFA</button>
+    </div>
+</div>
+
+<!-- ══ NAV BAR ══ -->
+<nav class="nav-bar hidden">
+    <div class="nav-item active" id="nav-panel" onclick="showView('panel')">
+        <span class="nav-icon">📊</span>HESAP
+    </div>
+</nav>
+
+<script>
+// ── STATE ──
+let db = JSON.parse(localStorage.getItem('matbaa_v6_db')) || {
+    k:[], s:[{ad:"Yok",f:0}], o:[{ad:"Yok",f:0}], asetat:[{ad:"Yok",f:0}],
+    b:[{ad:"Yok",s:0,e:0}], kesim:[{ad:"Yok",s:0,e:0}],
+    gofraj:[{ad:"Yok",s:0,e:0}], varak:[{ad:"Yok",s:0,e:0}],
+    yap:[{ad:"Yok",s:0,e:0}], lak:[{ad:"Yok",s:0,e:0}],
+    sivama:[{ad:"Yok",e:0}], vhm:[{ad:"Yok",en:0,boy:0,f:0}],
+    kur:32.50, history:[]
+};
+// localStorage'dan sadece müşteri geçmişini al
+const savedDb = JSON.parse(localStorage.getItem('matbaa_v6_db'));
+if (savedDb && savedDb.history && savedDb.history.length > 0) {
+    db.history = savedDb.history;
+}
+if (savedDb && savedDb.kur) {
+    db.kur = savedDb.kur;
+}
+
+let currentCat='k', currentTech='b', editIdx=-1, techEditIdx=-1;
+// Eksik kategorileri tamamla (eski versiyon uyumluluğu)
+if (!db.sivama) { db.sivama = []; save(); }
+if (!db.lak)    { db.lak    = [{ad:"Yok",s:0,e:0}]; save(); }
+if (!db.asetat) { db.asetat = [{ad:"Yok",f:0}]; save(); }
+if (!db.vhm)    { db.vhm    = [{ad:"Yok",en:0,boy:0,f:0}]; save(); }
+let aktifFirma='', aktifIs='', oncekiView='home';
+let costs={}, lastBirim=0;
+
+function save() { localStorage.setItem('matbaa_v6_db', JSON.stringify(db)); }
+
+// ── NAVİGASYON ──
+const NO_NAV_VIEWS = ['home','firm-ask','history'];
+const HOME_VIEWS   = ['home','firm-ask'];
+
+function showView(v) {
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    const t = document.getElementById('view-'+v);
+    if (t) t.classList.add('active');
+
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navEl = document.getElementById('nav-'+v);
+    if (navEl) navEl.classList.add('active');
+
+    // Nav bar yalnızca panel/hammadde/settings'te görünür
+    const showNav = ['panel','hammadde','settings'].includes(v);
+    document.querySelector('.nav-bar').classList.toggle('hidden', !showNav);
+
+    // Floating ANA SAYFA butonu — ana sayfa dışında hep görünür
+    document.getElementById('homeFab').classList.toggle('visible', v !== 'home');
+
+    // Sticky bar — sadece panel'de görünür
+    document.getElementById('stickyBar').classList.toggle('visible', v === 'panel');
+
+    if (v === 'history')  { renderHistory(); document.getElementById('historySearch').value = ''; }
+    if (v === 'panel')    updateSelects();
+    if (v === 'settings') renderTechList();
+    if (v === 'montaj')   mHesapla();
+    if (v === 'hammadde') { const btn = document.querySelector('.ham-nav-btn.active'); if (btn) setCat(currentCat, btn); }
+    window.scrollTo(0,0);
+}
+
+// Ana sayfadan hammadde/teknik
+function goHammadde() { oncekiView='home'; showView('hammadde'); }
+function goTeknik()   { oncekiView='home'; showView('settings'); }
+function geriDon()    { showView(oncekiView); }
+function navHammadde() { oncekiView='panel'; showView('hammadde'); }
+
+// ── YENİ FİYAT ──
+function openNewPrice() { showView('firm-ask'); document.getElementById('firmName').value=''; document.getElementById('isAdi').value=''; }
+
+function startApp() {
+    aktifFirma = document.getElementById('firmName').value.trim();
+    aktifIs    = document.getElementById('isAdi').value.trim();
+    if (!aktifFirma) { alert("Firma adı girin!"); return; }
+    document.getElementById('currentFirmDisplay').innerText = aktifFirma.toUpperCase();
+    document.getElementById('currentIsDisplay').innerText   = aktifIs;
+    document.getElementById('sonuc-view').classList.remove('show');
+    document.getElementById('karMarji').value = '';
+    const bmb = document.getElementById('birim-maliyet-box');
+    if(bmb) bmb.style.display='none';
+    costs={}; lastBirim=0; aktifHistoryIdx=-1;
+    oncekiView='panel';
+    showView('panel');
+
+    // Montaj'dan gelen ebat varsa doldur
+    if (window._montajEbat) {
+        const m = window._montajEbat;
+        document.getElementById('manEn').value      = m.en;
+        document.getElementById('manBoy').value     = m.boy;
+        document.getElementById('siparis').value    = m.siparis;
+        document.getElementById('montajAdet').value = m.montajAdet;
+        window._montajEbat = null;
+        runLogic();
+    }
+}
+
+// ── SELECTS ──
+// Select'e yeşil/kırmızı class uygula
+function colorSelect(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const txt = el.options[el.selectedIndex]?.text || '';
+    el.classList.remove('is-yok','is-ok');
+    el.classList.add(txt === 'Yok' || txt === '' ? 'is-yok' : 'is-ok');
+}
+function colorAllSelects() {
+    ['selKarton','selGramaj','selOndula','selSelefon','selBaski','selSivama','selVarak','selVhm','selGofraj','selKesim','selYap'].forEach(colorSelect);
+}
+
+function updateSelects() {
+    const names = [...new Set(db.k.map(x=>x.ad))];
+    const sk = document.getElementById('selKarton');
+    const prev = sk.value;
+    sk.innerHTML = names.map(x=>`<option value="${x}">${x}</option>`).join('');
+    if (prev && names.includes(prev)) sk.value=prev;
+    fillGramaj();
+    const map={selSelefon:'s',selOndula:'o',selBaski:'b',selKesim:'kesim',selGofraj:'gofraj',selVarak:'varak',selYap:'yap',selSivama:'sivama',selVhm:'vhm'};
+    for (let id in map) {
+        const el=document.getElementById(id), pv=el.value;
+        const arr = db[map[id]] || [];
+        el.innerHTML=arr.map((x,i)=>`<option value="${i}">${x.ad}</option>`).join('');
+        if (pv!==""&&arr[pv]) el.value=pv;
+    }
+    runLogic();
+    colorAllSelects();
+}
+
+function fillGramaj() {
+    const ka=document.getElementById('selKarton').value;
+    const grs=db.k.filter(x=>x.ad===ka);
+    const sg=document.getElementById('selGramaj'), prev=sg.value;
+    sg.innerHTML=grs.map(x=>`<option value="${db.k.indexOf(x)}">${x.gr} gr</option>`).join('');
+    if (prev!==""&&sg.querySelector(`option[value="${prev}"]`)) sg.value=prev;
+}
+
+// ── HESAP MOTORU (Patron mantığı: her kalem → 1 tabaka maliyeti) ──
+function runLogic() {
+    const enM  = parseFloat(document.getElementById('manEn').value)||1;
+    const boyM = parseFloat(document.getElementById('manBoy').value)||1;
+    const mAdet= parseInt(document.getElementById('montajAdet').value)||1;
+    const kAdet= parseInt(document.getElementById('kesimMontajAdet').value)||1;
+    const sip  = parseInt(document.getElementById('siparis').value)||0;
+    const tAd  = Math.ceil(sip/mAdet);           // toplam tabaka sayısı
+    const vurus= tAd*(mAdet/kAdet);              // kesim vuruşu
+    const enM_m  = enM/100;                      // metre cinsinden
+    const boyM_m = boyM/100;
+    const tabakaM2 = enM_m * boyM_m;             // 1 tabakanın m²'si
+    costs={};
+
+    // Helper: price tag güncelle — birim maliyet göster, seçilmemişse kırmızı YOK
+    const setPTag = (id, cost, sip) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const sel = el.closest('.dark-field')?.querySelector('select') ||
+                    document.querySelector(`select[onchange*="${id.replace('p-','')}"]`);
+        const selectedOpt = sel ? sel.options[sel.selectedIndex] : null;
+        const isYok = !cost || cost === 0 || (selectedOpt && selectedOpt.text === 'Yok');
+        if (isYok) {
+            el.innerText = 'YOK';
+            el.className = 'price-tag empty';
+        } else {
+            el.innerText = (cost/sip).toFixed(4) + '₺';
+            el.className = 'price-tag';
+        }
+    };
+
+    // ── KARTON ──
+    // kg fiyatı × (gramaj/1000) × (En m × Boy m) × fire = 1 tabaka karton ₺
+    const grIdx=document.getElementById('selGramaj').value;
+    if (grIdx!==""&&db.k[grIdx]) {
+        const k=db.k[grIdx];
+        const kgFiyat = k.f * db.kur;                        // kg başına ₺ (USD→TRY)
+        const fireMult = 1+(k.fire||0)/100;
+        const birTabakaKarton = kgFiyat * (k.gr/1000) * tabakaM2 * fireMult;
+        costs['KAĞIT'] = parseFloat((birTabakaKarton * tAd).toFixed(4));
+        setPTag('p-karton', costs['KAĞIT'], sip);
+    } else setPTag('p-karton', 0, sip);
+
+    // ── SELEFON ──
+    // m² fiyatı × tabakaM2 × fire = 1 tabaka selefon ₺
+    const sObj=db.s[document.getElementById('selSelefon').value];
+    if (sObj&&sObj.ad!=="Yok") {
+        const fireMult=1+(sObj.fire||0)/100;
+        const birTabakaSelefon = sObj.f * db.kur * tabakaM2 * fireMult;
+        costs['SELEFON'] = parseFloat((birTabakaSelefon * tAd).toFixed(4));
+        setPTag('p-selefon', costs['SELEFON'], sip);
+    } else setPTag('p-selefon', 0, sip);
+
+    // ── ONDULA ──
+    const oObj=db.o[document.getElementById('selOndula').value];
+    if (oObj&&oObj.ad!=="Yok") {
+        const fireMult=1+(oObj.fire||0)/100;
+        const birTabakaOndula = oObj.f * db.kur * tabakaM2 * fireMult;
+        costs['ONDULA'] = parseFloat((birTabakaOndula * tAd).toFixed(4));
+        setPTag('p-ondula', costs['ONDULA'], sip);
+    } else setPTag('p-ondula', 0, sip);
+
+    // ── BASKI ──
+    // Toplam baskı maliyeti ÷ tabaka sayısı = 1 tabaka baskı ₺
+    const bObj=db.b[document.getElementById('selBaski').value];
+    if (bObj&&bObj.ad!=="Yok") {
+        const toplamBaski = tAd<=1000 ? bObj.s : bObj.s+((tAd-1000)*bObj.e);
+        costs['BASKI'] = parseFloat(toplamBaski.toFixed(4));
+        setPTag('p-baski', toplamBaski, sip);
+    } else setPTag('p-baski', 0, sip);
+
+    // ── KESİM ──
+    const kesObj=db.kesim[document.getElementById('selKesim').value];
+    if (kesObj&&kesObj.ad!=="Yok") {
+        const toplamKesim = vurus<=1000 ? kesObj.s : kesObj.s+((vurus-1000)*kesObj.e);
+        costs['KESİM'] = parseFloat(toplamKesim.toFixed(4));
+        setPTag('p-kesim', toplamKesim, sip);
+    } else setPTag('p-kesim', 0, sip);
+
+    // ── GOFRAJ ──
+    const gofObj=db.gofraj[document.getElementById('selGofraj').value];
+    if (gofObj&&gofObj.ad!=="Yok") {
+        const toplamGofraj = gofObj.s+(vurus*gofObj.e);
+        costs['GOFRAJ'] = parseFloat(toplamGofraj.toFixed(4));
+        setPTag('p-gofraj', toplamGofraj, sip);
+    } else setPTag('p-gofraj', 0, sip);
+
+    // ── VARAK İŞLEM ──
+    const varObj=db.varak[document.getElementById('selVarak').value];
+    if (varObj&&varObj.ad!=="Yok") {
+        const toplamVarak = varObj.s+(vurus*varObj.e);
+        costs['VARAK İŞLEM'] = parseFloat(toplamVarak.toFixed(4));
+        setPTag('p-varak', toplamVarak, sip);
+    } else setPTag('p-varak', 0, sip);
+
+    // ── VARAK FOLYO (Hammadde) ──
+    // Her tabakadan kaç adet varak folyo çıkar? → (iş En × iş Boy) / (vhm En × vhm Boy)
+    const vhmIdx = document.getElementById('selVhm').value;
+    const vhmObj = vhmIdx!=="" ? (db.vhm||[])[vhmIdx] : null;
+    if (vhmObj&&vhmObj.ad!=="Yok"&&vhmObj.en>0&&vhmObj.boy>0) {
+        const adetPerTabaka = Math.ceil((enM_m*100 * boyM_m*100) / (vhmObj.en * vhmObj.boy));
+        const vhmFiyat = vhmObj.f * db.kur;
+        const fireMult = 1+(vhmObj.fire||0)/100;
+        costs['VARAK FOLYO'] = parseFloat((adetPerTabaka * vhmFiyat * tAd * fireMult).toFixed(4));
+        setPTag('p-vhm', costs['VARAK FOLYO'], sip);
+    } else { setPTag('p-vhm', 0, sip); delete costs['VARAK FOLYO']; }
+
+    // ── YAPISTIRMA ──
+    const yapObj=db.yap[document.getElementById('selYap').value];
+    if (yapObj&&yapObj.ad!=="Yok") {
+        const toplamYap = sip*yapObj.e;
+        costs['YAPI'] = parseFloat(toplamYap.toFixed(4));
+        setPTag('p-yap', toplamYap, sip);
+    } else setPTag('p-yap', 0, sip);
+
+    // ── SIVAMA ──
+    // tabakaM2 × tabaka sayısı × m² birim fiyatı
+    const sivIdx=document.getElementById('selSivama').value;
+    const sivObj=sivIdx!==""?db.sivama[sivIdx]:null;
+    if (sivObj&&sivObj.ad!=="Yok"&&sivObj.e>0) {
+        const toplamSivama = tabakaM2 * tAd * sivObj.e;
+        costs['SIVAMA'] = parseFloat(toplamSivama.toFixed(4));
+        setPTag('p-sivama', toplamSivama, sip);
+    } else { setPTag('p-sivama', 0, sip); delete costs['SIVAMA']; }
+
+    colorAllSelects();
+
+    // Sticky bar güncelle
+    const sipStr   = (sip||0).toLocaleString('tr-TR');
+    const boyStr   = document.getElementById('manBoy').value||'—';
+    const enStr    = document.getElementById('manEn').value||'—';
+    const mAdetStr = document.getElementById('montajAdet').value||'—';
+    const scSip    = document.getElementById('sc-siparis');
+    const scOlcu   = document.getElementById('sc-olcu');
+    const scMon    = document.getElementById('sc-montaj');
+    const scIsl    = document.getElementById('sc-islemler');
+    if (scSip)  scSip.innerText  = '📦 ' + sipStr + ' adet';
+    if (scOlcu) scOlcu.innerText = '📐 ' + boyStr + '×' + enStr + ' cm';
+    if (scMon)  scMon.innerText  = '🖨️ ' + mAdetStr + '\'li';
+    const islemler = [];
+    const kartonEl = document.getElementById('selKarton');
+    const gramajEl = document.getElementById('selGramaj');
+    if (kartonEl?.value) islemler.push((kartonEl.options[kartonEl.selectedIndex]?.text||'') + (gramajEl?.options[gramajEl.selectedIndex]?.text ? ' ' + gramajEl.options[gramajEl.selectedIndex].text : ''));
+    ['selBaski','selSelefon','selOndula','selKesim','selGofraj','selVarak','selYap','selSivama'].forEach(id=>{
+        const el=document.getElementById(id);
+        const txt=el?.options[el.selectedIndex]?.text;
+        if (txt && txt!=='Yok') islemler.push(txt);
+    });
+    if (scIsl) scIsl.innerText = islemler.length>0 ? '⚙️ '+islemler.join(' · ') : '⚙️ —';
+}
+    const karStr = document.getElementById('karMarji').value.trim();
+    if (karStr === '') {
+        alert("⚠️ Lütfen Kod Girin (Kâr %) alanını doldurun!");
+        document.getElementById('karMarji').focus();
+        return;
+    }
+    const kar = parseFloat(karStr) || 0;
+
+    runLogic();
+    let toplamMaliyet=0; const breakdown=[];
+    for (const [k,v] of Object.entries(costs)) { if (v>0) { toplamMaliyet+=v; breakdown.push({name:k,val:v}); } }
+    const sip   = parseInt(document.getElementById('siparis').value)||1;
+    const mAdet = parseInt(document.getElementById('montajAdet').value)||1;
+    const tAd   = Math.ceil(sip/mAdet);
+    lastBirim   = sip>0 ? toplamMaliyet/sip : 0;
+
+    const birimSatis  = lastBirim * (1 + kar/100);
+    const toplamSatis = birimSatis * sip;
+    const KDV = 0.20;
+    const birimKdvli  = birimSatis * (1 + KDV);
+    const toplamKdvli = toplamSatis * (1 + KDV);
+
+    const fmt  = (v,d=2) => v.toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+    document.getElementById('total-price').innerText = fmt(toplamSatis)+' ₺';
+    document.getElementById('unit-price').innerText  = fmt(birimSatis)+' ₺';
+    document.getElementById('total-kdv').innerText   = 'KDV\'li: '+fmt(toplamKdvli)+' ₺';
+    document.getElementById('unit-kdv').innerText    = 'KDV\'li: '+fmt(birimKdvli)+' ₺';
+
+    document.getElementById('maliyet-breakdown').innerHTML =
+        `<div style="background:rgba(79,140,255,.1);border:1px solid rgba(79,140,255,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:9px;font-weight:900;color:#7eb3ff;letter-spacing:1px;text-transform:uppercase;">📋 Tabaka Sayısı</span>
+            <span style="font-size:16px;font-weight:900;color:#7eb3ff;">${tAd.toLocaleString('tr-TR')} tabaka</span>
+        </div>` +
+        `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:8px;font-weight:900;color:rgba(255,255,255,.25);letter-spacing:1px;text-transform:uppercase;padding:0 2px;margin-bottom:4px;">
+            <span>KALEM</span>
+            <span style="text-align:right;">TOPLAM</span>
+            <span style="text-align:right;">1 TABAKA</span>
+        </div>` +
+        breakdown.map(b=>`
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;">
+            <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;">${b.name}</span>
+            <span style="text-align:right;font-size:12px;font-weight:700;color:rgba(255,255,255,.35);">${fmt(b.val)} ₺</span>
+            <span style="text-align:right;font-size:13px;font-weight:900;color:var(--green2);">${fmt(b.val/tAd,4)} ₺</span>
+        </div>`).join('') +
+        // Tabaka toplamı
+        `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 2px;margin-top:4px;border-top:1px solid rgba(255,255,255,.1);">
+            <span style="font-size:9px;font-weight:900;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;">TABAKA TOPLAM</span>
+            <span style="text-align:right;font-size:13px;font-weight:900;color:rgba(255,255,255,.4);">${fmt(toplamMaliyet)} ₺</span>
+            <span style="text-align:right;font-size:13px;font-weight:900;color:rgba(255,255,255,.5);">${fmt(toplamMaliyet/tAd,4)} ₺</span>
+        </div>`;
+
+    // Birim maliyet kutusunu göster (Hesapla butonunun altında)
+    const bmBox = document.getElementById('birim-maliyet-box');
+    bmBox.style.display = 'flex';
+    document.getElementById('bm-montaj').innerText = mAdet;
+    document.getElementById('bm-deger').innerText = fmt(lastBirim,4) + ' ₺';
+
+    document.getElementById('sonuc-view').classList.add('show');
+    setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),50);
+}
+
+function iptalEt() {
+    document.getElementById('sonuc-view').classList.remove('show');
+    document.getElementById('birim-maliyet-box').style.display='none';
+    costs={}; lastBirim=0;
+}
+
+// ── GEÇMİŞ ──
+function saveToHistory() {
+    const totalEl=document.getElementById('total-price').innerText;
+    if (!totalEl||totalEl==='0 ₺') { alert("Önce hesaplama yapın!"); return; }
+    const d=new Date();
+    const record={
+        id:Date.now(), firma:aktifFirma, isAdi:aktifIs,
+        tarih:d.toLocaleDateString('tr-TR')+' '+d.toLocaleTimeString('tr-TR').slice(0,5),
+        toplam:totalEl,
+        birim:document.getElementById('unit-price').innerText,
+        inputs:{
+            boy:document.getElementById('manBoy').value,
+            en:document.getElementById('manEn').value,
+            montaj:document.getElementById('montajAdet').value,
+            kesimMontaj:document.getElementById('kesimMontajAdet').value,
+            bicakNo:document.getElementById('bicakNo').value,
+            siparis:document.getElementById('siparis').value,
+            sKarton:document.getElementById('selKarton').value,
+            sGramaj:document.getElementById('selGramaj').value,
+            sOndula:document.getElementById('selOndula').value,
+            sSelefon:document.getElementById('selSelefon').value,
+            sBaski:document.getElementById('selBaski').value,
+            sVarak:document.getElementById('selVarak').value,
+            sGofraj:document.getElementById('selGofraj').value,
+            sKesim:document.getElementById('selKesim').value,
+            sYap:document.getElementById('selYap').value
+        }
+    };
+    if (aktifHistoryIdx > -1) {
+        // Mevcut kaydın üzerine yaz
+        db.history[aktifHistoryIdx] = record;
+        aktifHistoryIdx = -1;
+        save();
+        alert("✅ Teklif güncellendi!");
+    } else {
+        // Yeni kayıt
+        db.history.unshift(record);
+        save();
+        alert("✅ Teklif kaydedildi!");
+    }
+    showView('home');
+}
+
+function renderHistory() {
+    const list=document.getElementById('history-list');
+    const q=(document.getElementById('historySearch')?.value||'').toLowerCase().trim();
+    if (db.history.length===0) { list.innerHTML=`<div class="empty-state"><div class="big">📋</div>Henüz kayıt yok</div>`; return; }
+    const filtered=db.history.map((x,i)=>({...x,origIdx:i})).filter(x=>
+        !q||(x.firma||'').toLowerCase().includes(q)||(x.isAdi||'').toLowerCase().includes(q)
+    );
+    if (filtered.length===0) { list.innerHTML=`<div class="empty-state"><div class="big">🔍</div>Sonuç bulunamadı</div>`; return; }
+    list.innerHTML=filtered.map(x=>`
+        <div class="hist-card">
+            <div class="hist-info">
+                <div class="hist-firma">${x.firma.toUpperCase()}</div>
+                ${x.isAdi?`<div class="hist-is">📌 ${x.isAdi}</div>`:''}
+                <div class="hist-tarih">${x.tarih}</div>
+                <div class="hist-birim">${x.birim||x.toplam}</div>
+                <div class="hist-toplam">Toplam: ${x.toplam}</div>
+            </div>
+            <div class="hist-actions">
+                <button class="btn-upd" onclick="loadAndReCalc(${x.origIdx})">🔄 AÇ</button>
+                <button class="btn-del" onclick="deleteHistory(${x.origIdx})">🗑 SİL</button>
+            </div>
+        </div>`).join('');
+}
+
+function deleteHistory(i) {
+    if (confirm("Bu kaydı silmek istiyor musunuz?")) { db.history.splice(i,1); save(); renderHistory(); }
+}
+
+let aktifHistoryIdx = -1; // düzenlenen kaydın index'i, -1 ise yeni kayıt
+
+function loadAndReCalc(hIdx) {
+    const item=db.history[hIdx];
+    aktifFirma=item.firma; aktifIs=item.isAdi||'';
+    aktifHistoryIdx = hIdx; // hangi kaydı düzenlediğimizi sakla
+    document.getElementById('currentFirmDisplay').innerText=aktifFirma.toUpperCase();
+    document.getElementById('currentIsDisplay').innerText=aktifIs;
+    oncekiView='panel';
+    showView('panel');
+    document.getElementById('manBoy').value=item.inputs.boy;
+    document.getElementById('manEn').value=item.inputs.en;
+    document.getElementById('montajAdet').value=item.inputs.montaj;
+    document.getElementById('kesimMontajAdet').value=item.inputs.kesimMontaj;
+    document.getElementById('bicakNo').value=item.inputs.bicakNo||'';
+    document.getElementById('siparis').value=item.inputs.siparis;
+    updateSelects();
+    const sk=document.getElementById('selKarton');
+    if (item.inputs.sKarton&&sk.querySelector(`option[value="${item.inputs.sKarton}"]`)) sk.value=item.inputs.sKarton;
+    fillGramaj();
+    const sg=document.getElementById('selGramaj');
+    if (item.inputs.sGramaj!==undefined&&sg.querySelector(`option[value="${item.inputs.sGramaj}"]`)) sg.value=item.inputs.sGramaj;
+    ['selOndula','selSelefon','selBaski','selVarak','selGofraj','selKesim','selYap'].forEach((id,i)=>{
+        const el=document.getElementById(id), val=item.inputs[['sOndula','sSelefon','sBaski','sVarak','sGofraj','sKesim','sYap'][i]];
+        if (val!==undefined&&el.querySelector(`option[value="${val}"]`)) el.value=val;
+    });
+    runLogic(); fiyatCikart();
+}
+
+// ── HAMMADDE ──
+function updateGlobalKur(v) { db.kur=parseFloat(v)||1; save(); runLogic(); }
+
+function setCat(c,btn) {
+    currentCat=c; editIdx=-1;
+    if (!db[currentCat]) { db[currentCat]=[]; save(); }
+    document.querySelectorAll('.ham-nav-btn').forEach(e=>e.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('gr-alan').style.display    = (c==='k') ? 'block' : 'none';
+    document.getElementById('varak-alan').style.display = (c==='vhm') ? 'block' : 'none';
+    ['inAd','inUsd','inTry','inGr','inFire','inVEn','inVBoy'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.value='';
+    });
+    document.getElementById('hamSaveBtn').innerText='KAYDET';
+    renderList();
+}
+
+function syncPrice(s) {
+    const u=document.getElementById('inUsd'),t=document.getElementById('inTry');
+    if (s==='usd') t.value=(parseFloat(u.value)*db.kur).toFixed(2);
+    else u.value=(parseFloat(t.value)/db.kur).toFixed(4);
+}
+
+function saveItem() {
+    const ad  = document.getElementById('inAd').value.trim();
+    const usd = parseFloat(document.getElementById('inUsd').value)||0;
+    const gr  = parseFloat(document.getElementById('inGr').value)||0;
+    const fire= parseFloat(document.getElementById('inFire').value)||0;
+    if (!ad) { alert("Hammadde adı girin!"); return; }
+    if (currentCat==='k'&&!gr) { alert("Gramaj girin!"); return; }
+    let item = {ad, f:usd, fire};
+    if (currentCat==='k')   item.gr  = gr;
+    if (currentCat==='vhm') {
+        item.en  = parseFloat(document.getElementById('inVEn').value)||0;
+        item.boy = parseFloat(document.getElementById('inVBoy').value)||0;
+    }
+    if (editIdx>-1) db[currentCat][editIdx]=item; else db[currentCat].push(item);
+    save();
+    setCat(currentCat,document.querySelector('.ham-nav-btn.active'));
+    editIdx=-1;
+}
+
+function editHam(i) {
+    editIdx=i; const item=db[currentCat][i];
+    document.getElementById('inAd').value   = item.ad;
+    document.getElementById('inUsd').value  = item.f;
+    document.getElementById('inFire').value = item.fire||0;
+    syncPrice('usd');
+    if (currentCat==='k')   document.getElementById('inGr').value   = item.gr;
+    if (currentCat==='vhm') {
+        document.getElementById('inVEn').value  = item.en||0;
+        document.getElementById('inVBoy').value = item.boy||0;
+    }
+    document.getElementById('hamSaveBtn').innerText='GÜNCELLE';
+    window.scrollTo(0,0);
+}
+
+function renderList() {
+    const el=document.getElementById('liste-alani'), list=db[currentCat]||[];
+    if (!list.length) { el.innerHTML=`<div class="empty-state"><div class="big">📦</div>Kayıt yok</div>`; return; }
+    el.innerHTML=list.map((x,i)=>`
+        <div class="list-item">
+            <div>
+                <div class="li-name">${x.ad}${x.gr?' · '+x.gr+'gr':''}${(currentCat==='vhm'&&x.en)?` · ${x.en}×${x.boy}cm`:''}</div>
+                <div class="li-price">$${x.f} / ${(x.f*db.kur).toFixed(2)}₺${x.fire?` · 🔥%${x.fire}`:''}</div>
+            </div>
+            <div><button class="btn-sm-edit" onclick="editHam(${i})">DÜZENLE</button><button class="btn-sm-del" onclick="delHam(${i})">SİL</button></div>
+        </div>`).join('');
+}
+
+function delHam(i) { if (confirm("Silinsin mi?")) { db[currentCat].splice(i,1); save(); renderList(); } }
+
+// ── TEKNİK ──
+function setTech(t,btn) {
+    currentTech=t; techEditIdx=-1;
+    // Eğer db'de bu kategori yoksa oluştur
+    if (!db[currentTech]) { db[currentTech]=[]; save(); }
+    document.querySelectorAll('.tech-nav-btn').forEach(e=>e.classList.remove('active'));
+    btn.classList.add('active');
+    ['itAd','itS','itE'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('techSaveBtn').innerText='KAYDET';
+    const isSivama = t === 'sivama';
+    document.getElementById('itS-alan').style.display = isSivama ? 'none' : '';
+    document.getElementById('itE-label').innerText = isSivama ? 'm² Birim Fiyat (₺)' : 'Birim Fiyat (₺)';
+    renderTechList();
+}
+
+function addTech() {
+    const ad=document.getElementById('itAd').value.trim();
+    const s=parseFloat(document.getElementById('itS').value)||0;
+    const e=parseFloat(document.getElementById('itE').value)||0;
+    if (!ad) { alert("İşlem adı girin!"); return; }
+    if (!db[currentTech]) db[currentTech]=[];
+    const item = currentTech==='sivama' ? {ad,e} : {ad,s,e};
+    if (techEditIdx>-1) db[currentTech][techEditIdx]=item; else db[currentTech].push(item);
+    save();
+    setTech(currentTech,document.querySelector('.tech-nav-btn.active'));
+}
+
+function editTech(i) {
+    techEditIdx=i; const item=db[currentTech][i];
+    document.getElementById('itAd').value=item.ad||'';
+    document.getElementById('itS').value=item.s||'';
+    document.getElementById('itE').value=item.e||'';
+    document.getElementById('techSaveBtn').innerText='GÜNCELLE';
+    window.scrollTo(0,0);
+}
+
+function renderTechList() {
+    const el=document.getElementById('tech-list');
+    const list=db[currentTech]||[];
+    if (!list.length) { el.innerHTML=`<div class="empty-state"><div class="big">⚙️</div>Kayıt yok</div>`; return; }
+    el.innerHTML=list.map((x,i)=>`
+        <div class="list-item">
+            <div>
+                <div class="li-name">${x.ad}</div>
+                <div class="li-price">${currentTech==='sivama' ? `m²: ${x.e}₺` : `Sabit:${x.s||0}₺ · Birim:${x.e||0}₺`}</div>
+            </div>
+            <div><button class="btn-sm-edit" onclick="editTech(${i})">DÜZENLE</button><button class="btn-sm-del" onclick="delTech(${i})">SİL</button></div>
+        </div>`).join('');
+}
+
+function delTech(i) { if (confirm("Silinsin mi?")) { db[currentTech].splice(i,1); save(); renderTechList(); } }
+
+// ── YEDEKLEME ──
+function yedekIndir() {
+    const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const tarih = new Date().toLocaleDateString('tr-TR').replace(/\./g,'-');
+    a.download = `matbaa_yedek_${tarih}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function yedekYukle(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        try {
+            const yeni = JSON.parse(ev.target.result);
+            if (!yeni.history || !yeni.kur) { alert("Geçersiz yedek dosyası!"); return; }
+            if (confirm("Mevcut tüm veriler silinip yedek yüklenecek. Devam?")) {
+                db = yeni;
+                save();
+                alert("✅ Yedek başarıyla yüklendi!");
+                renderHistory();
+            }
+        } catch { alert("Dosya okunamadı!"); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+}
+
+// ── MONTAJ ──
+let montajSonuc = null; // hesaplanan ebat burada saklanır
+
+function mHesapla() {
+    const iE   = parseFloat(document.getElementById('m-isEn').value)   || 1;
+    const iB   = parseFloat(document.getElementById('m-isBoy').value)  || 1;
+    const ara  = parseFloat(document.getElementById('m-ara').value)    || 0;
+    const pMak = parseFloat(document.getElementById('m-pM').value)     || 0;
+    const pEt  = parseFloat(document.getElementById('m-pE').value)     || 0;
+    const pMot = parseFloat(document.getElementById('m-pMo').value)    || 0;
+    const pKum = parseFloat(document.getElementById('m-pKu').value)    || 0;
+    const sip  = parseInt(document.getElementById('m-siparis').value)  || 1000;
+    const maxEn  = parseFloat(document.getElementById('m-maxEn').value)  || 105;
+    const maxBoy = parseFloat(document.getElementById('m-maxBoy').value) || 74;
+
+    const topPayEn  = pMak + pEt;
+    const topPayBoy = pMot + pKum;
+    const netEn  = maxEn  - topPayEn;
+    const netBoy = maxBoy - topPayBoy;
+
+    const btn = document.getElementById('btnUseEbat');
+
+    if (netEn <= 0 || netBoy <= 0) {
+        mHata('Paylar makine limitini aşıyor!');
+        btn.classList.remove('visible'); montajSonuc = null; return;
+    }
+
+    const c1 = Math.floor((netEn  + ara) / (iE + ara));
+    const r1 = Math.floor((netBoy + ara) / (iB + ara));
+    const c2 = Math.floor((netEn  + ara) / (iB + ara));
+    const r2 = Math.floor((netBoy + ara) / (iE + ara));
+    const ad1 = c1*r1, ad2 = c2*r2;
+
+    if (ad1 === 0 && ad2 === 0) {
+        mHata('İş ebadı makine limitine sığmıyor.');
+        btn.classList.remove('visible'); montajSonuc = null; return;
+    }
+
+    const don = ad2 > ad1;
+    const c = don ? c2 : c1, r = don ? r2 : r1;
+    const sE = don ? iB : iE, sB = don ? iE : iB;
+    const adet = don ? ad2 : ad1;
+
+    const kulEn  = parseFloat(Math.min(c*sE + (c-1)*ara + topPayEn,  maxEn ).toFixed(2));
+    const kulBoy = parseFloat(Math.min(r*sB + (r-1)*ara + topPayBoy, maxBoy).toFixed(2));
+    const fire = ((1 - (adet*sE*sB)/(kulEn*kulBoy))*100).toFixed(1);
+    const tabakaSayisi = Math.ceil(sip / adet);
+
+    document.getElementById('m-r-adet').textContent   = adet;
+    document.getElementById('m-r-tabaka').textContent = tabakaSayisi.toLocaleString('tr-TR');
+    document.getElementById('m-r-tabsize').textContent= `${kulEn}×${kulBoy}`;
+    document.getElementById('m-dims').textContent     = `En:${kulEn} × Boy:${kulBoy} cm`;
+    document.getElementById('m-info-text').innerHTML  =
+        `Dizim: <span>${c} sütun × ${r} satır</span> &nbsp;|&nbsp; Yön: <span>${don?'Döndürülmüş ↺':'Normal →'}</span><br>` +
+        `İş yönü: <span>${sE}×${sB} cm</span> &nbsp;|&nbsp; Fire: <span>${fire}%</span><br>` +
+        `Tabaka ebatı: <span>${kulEn} en × ${kulBoy} boy cm</span><br>` +
+        `Sipariş: <span>${sip.toLocaleString('tr-TR')}</span> adet → <span>${tabakaSayisi.toLocaleString('tr-TR')}</span> tabaka`;
+
+    mCizGorsel({adet,c,r,sE,sB,kulEn,kulBoy}, pMak,pEt,pMot,pKum);
+
+    // Ebat hazır — butonu göster
+    montajSonuc = { en: kulEn, boy: kulBoy, montajAdet: adet, siparis: sip };
+    btn.classList.add('visible');
+}
+
+function mHata(msg) {
+    ['m-r-adet','m-r-tabaka','m-r-tabsize'].forEach(id => document.getElementById(id).textContent='!');
+    document.getElementById('m-dims').textContent    = '— × —';
+    document.getElementById('m-info-text').innerHTML = `<span style="color:#ff6b6b">${msg}</span>`;
+}
+
+function mCizGorsel(b, pMak, pEt, pMot, pKum) {
+    const MAX_W=280, MAX_H=180;
+    const oran = b.kulEn / b.kulBoy;
+    let w=MAX_W, h=Math.round(w/oran);
+    if (h>MAX_H) { h=MAX_H; w=Math.round(h*oran); }
+    const v = w/b.kulEn;
+    const vv= h/b.kulBoy;
+
+    const tab = document.getElementById('m-tabaka');
+    tab.style.width  = w+'px';
+    tab.style.height = h+'px';
+    tab.style.padding= `${pEt*vv}px ${pKum*vv}px ${pMak*vv}px ${pMot*vv}px`;
+    tab.style.gridTemplateColumns = `repeat(${b.c},1fr)`;
+
+    document.getElementById('m-ov-top').style.height  = (pEt *vv)+'px';
+    document.getElementById('m-ov-bot').style.height  = (pMak*vv)+'px';
+    document.getElementById('m-ov-left').style.width  = (pMot*vv)+'px';
+    document.getElementById('m-ov-right').style.width = (pKum*vv)+'px';
+
+    const overlays = [...tab.querySelectorAll('.m-pay-overlay')];
+    tab.innerHTML = '';
+    overlays.forEach(o => tab.appendChild(o));
+
+    const kus = `<svg viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 24 Q10 10 22 16 Q28 6 40 10 Q48 6 58 10 Q46 18 44 22 Q36 16 28 20 Q16 14 4 24Z" fill="#1a1a2e"/><path d="M28 20 Q30 26 26 30 Q24 32 22 30 Q24 26 28 20Z" fill="#111"/><circle cx="44" cy="13" r="1.5" fill="#fff" opacity="0.9"/></svg>`;
+    const frag = document.createDocumentFragment();
+    for (let i=0; i<Math.min(b.adet,150); i++) {
+        const d = document.createElement('div');
+        d.className = 'm-is-kutusu';
+        d.innerHTML = kus;
+        frag.appendChild(d);
+    }
+    tab.appendChild(frag);
+}
+
+function ebatiKullan() {
+    if (!montajSonuc) return;
+    // Panel'e geç, ebatları doldur
+    showView('firm-ask');
+    // Ebatı geçici olarak sakla, startApp sonrası panel'de doldur
+    window._montajEbat = montajSonuc;
+}
+
+// ── INIT ──
+window.onload=()=>{
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/matbaa-expert/sw.js').catch(()=>{});
+    }
+    fetch('https://erdalibis75-dotcom.github.io/matbaa-expert/data.json?t='+Date.now())
+        .then(r=>r.json())
+        .then(data=>{
+            const keys=['k','s','o','asetat','vhm','b','kesim','gofraj','varak','yap','lak','sivama'];
+            keys.forEach(k=>{ if(data[k]) db[k]=data[k]; });
+            if(data.kur) db.kur=data.kur;
+            save();
+        })
+        .catch(()=>{});
+};</script>
+</body>
+</html>
