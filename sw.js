@@ -1,4 +1,4 @@
-const CACHE = 'matbaa-expert-v10';
+const CACHE = 'matbaa-expert-v11';
 const ASSETS = [
   '/matbaa-expert/',
   '/matbaa-expert/index.html',
